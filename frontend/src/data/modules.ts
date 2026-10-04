@@ -1,18 +1,9 @@
 import type { ModuleMeta } from './types'
 
 // 模块元数据由仓库生成时写入：字段、状态、动作、流转目标都在这里，页面不再各自写一遍。
+// 注意：巡护任务（patrol）有独立的执行记录领域模型，不在此泛化列表中，
+// 见 src/data/patrol/ 与 src/api/patrol-service.ts。
 export const MODULES: ModuleMeta[] = [
-  {
-    key: "patrol",
-    name: "巡护任务",
-    entity: "巡护任务",
-    desc: "维护巡护任务，围绕任务编号、巡护区域、巡护路线、巡护员做登记、筛选与状态流转。",
-    fields: ["任务编号", "巡护区域", "巡护路线", "巡护员", "巡护日期", "巡护时段", "发现火情数", "任务状态"],
-    statuses: ["待执行", "执行中", "已完成", "已取消"],
-    actions: ["开始巡护", "确认完成", "取消任务"],
-    actionTargets: {"开始巡护": "执行中", "确认完成": "已完成", "取消任务": "已取消"},
-    metrics: ["今日任务数", "已完成任务", "巡护覆盖率"],
-  },
   {
     key: "firewatch",
     name: "火险监测",

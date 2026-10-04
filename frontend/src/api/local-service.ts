@@ -1,5 +1,6 @@
 import { MODULE_BY_KEY } from '@/data/modules'
 import { allRows, listRows, resetRows, saveRows } from '@/data/local-store'
+import { listTasks as listPatrolTasks } from '@/api/patrol-service'
 import type { ActionResult, EntryRow, ModuleMeta, OverviewResult, PageResult } from '@/data/types'
 
 // 会写进数据的「往回走」动作：命中就把这条记录标成异常态，看板上能一眼看出来。
@@ -95,11 +96,22 @@ export function loadOverview(): OverviewResult {
       abnormal: entries.filter((row) => row.abnormal).length,
     }
   })
+
+  // 巡护任务以执行记录领域为唯一来源，口径与班组列表/执行详情/任务台账保持一致。
+  const patrolViews = listPatrolTasks()
+  const patrolRow = {
+    name: '巡护任务',
+    created: patrolViews.length,
+    pending: patrolViews.filter((row) => row.status === '待执行' || row.status === '执行中').length,
+    abnormal: patrolViews.filter((row) => row.fireCount > 0).length,
+  }
+  const allModules = [patrolRow, ...modules]
+
   const cards = [
-    { label: '业务模块', value: modules.length },
-    { label: '登记总量', value: modules.reduce((sum, item) => sum + item.created, 0) },
-    { label: '待处理', value: modules.reduce((sum, item) => sum + item.pending, 0) },
-    { label: '异常量', value: modules.reduce((sum, item) => sum + item.abnormal, 0) },
+    { label: '业务模块', value: allModules.length },
+    { label: '登记总量', value: allModules.reduce((sum, item) => sum + item.created, 0) },
+    { label: '待处理', value: allModules.reduce((sum, item) => sum + item.pending, 0) },
+    { label: '异常量', value: allModules.reduce((sum, item) => sum + item.abnormal, 0) },
   ]
-  return { cards, modules }
+  return { cards, modules: allModules }
 }

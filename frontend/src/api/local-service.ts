@@ -1,4 +1,5 @@
 import { MODULE_BY_KEY } from '@/data/modules'
+import { patrolOverview } from '@/api/patrol-service'
 import { allRows, listRows, resetRows, saveRows } from '@/data/local-store'
 import type { ActionResult, EntryRow, ModuleMeta, OverviewResult, PageResult } from '@/data/types'
 
@@ -86,7 +87,17 @@ export function downloadEntries(key: string): void {
 
 export function loadOverview(): OverviewResult {
   const rows = allRows()
+  const patrolStats = patrolOverview()
   const modules = [...MODULE_BY_KEY.values()].map((meta) => {
+    if (meta.key === 'patrol') {
+      // 巡护模块已迁入任务域：待处理/异常量与班组列表、执行详情保持同一口径。
+      return {
+        name: meta.name,
+        created: patrolStats.total,
+        pending: patrolStats.pendingCount,
+        abnormal: patrolStats.cancelledCount,
+      }
+    }
     const entries = rows[meta.key] ?? []
     return {
       name: meta.name,
